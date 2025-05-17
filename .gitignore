@@ -1,0 +1,49 @@
+# Node.js and npm
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Compiled output
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Coverage reports
+coverage/
+
+# Build artifacts
+*.tgz
+*.zip
+
+# Dependency directories
+jspm_packages/
+bower_components/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional: Ignore local configuration files
+*.local
