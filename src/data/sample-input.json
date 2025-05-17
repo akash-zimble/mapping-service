@@ -1,0 +1,58 @@
+{
+    "data": {
+      "first_name": "Jane",
+      "last_name": "Smith",
+      "age": "25",
+      "membership": "gold",
+      "product_code": "ABC",
+      "product_suffix": "123",
+      "extra": "xyz",
+      "is_active": "true",
+      "null_field": "null"
+    },
+    "mappingConfig": {
+      "full_name": {
+        "source": ["first_name", "last_name"],
+        "transform": "concat(source[0], ' ', source[1])",
+        "type": "string",
+        "constraints": { "maxLength": 50 }
+      },
+      "age": {
+        "source": "age",
+        "type": "number",
+        "constraints": { "min": 18, "max": 100 }
+      },
+      "membership_level": {
+        "source": "membership",
+        "transform": "translate(source, translator['membership'])",
+        "type": "string"
+      },
+      "product_id": {
+        "source": ["product_code", "product_suffix", "extra"],
+        "transform": "concat(source[0], '-', source[1], '[', source[2], ']')",
+        "type": "string",
+        "constraints": { "maxLength": 15 }
+      },
+      "product_name": {
+        "source": ["product_code", "product_suffix", "extra", "membership"],
+        "transform": "concat(source[0], '-', source[1], '[', source[2], ']', source[3])",
+        "type": "string",
+        "constraints": { "maxLength": 20 }
+      },
+      "is_active": {
+        "source": "is_active",
+        "type": "boolean"
+      },
+      "null_field": {
+        "source": "null_field",
+        "type": "null"
+      }
+    },
+    "translator": {
+      "membership": [
+        { "key": "gold", "value": "Premium" },
+        { "key": "silver", "value": "Standard" },
+        { "key": "bronze", "value": "Basic" }
+      ]
+    }
+  }
