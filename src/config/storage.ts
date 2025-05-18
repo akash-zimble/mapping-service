@@ -12,7 +12,7 @@ interface Translator {
 
 const mappings: Mapping[] = [
   {
-    id: 'user-profile',
+    id: 'recipe-1',
     config: {
       'profile.name.full': {
         source: ['user.first_name', 'user.last_name'],
@@ -23,6 +23,12 @@ const mappings: Mapping[] = [
       'profile.age': {
         source: 'age',
         type: 'number',
+        constraints: { min: 18, max: 100 }
+      },
+      'profile.customId': {
+        source: 'data',
+        transform: `()=>{return data.user.first_name.toUpperCase()+" "+data.age}`,
+        type: 'string',
         constraints: { min: 18, max: 100 }
       },
       'membership_level': {

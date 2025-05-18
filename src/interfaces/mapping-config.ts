@@ -13,3 +13,5 @@ export interface MappingConfig {
     key: string;
     value: string;
   }
+
+  export type Translator = Record<string, TranslatorEntry[]>;

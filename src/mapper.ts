@@ -4,6 +4,7 @@ import { Transformer } from './interfaces/transformer';
 import { Validator } from './interfaces/validator';
 import { ConcatTransformer } from './transformers/concat-transformer';
 import { TranslateTransformer } from './transformers/translate-transformer';
+import { CustomTransformer } from './transformers/custom-transformer';
 import { FieldValidator } from './validators/field-validator';
 import { getNestedValue, setNestedValue } from './utils/nested-path';
 
@@ -14,7 +15,8 @@ export class Mapper {
   constructor() {
     this.transformers = new Map([
       ['concat', new ConcatTransformer()],
-      ['translate', new TranslateTransformer()]
+      ['translate', new TranslateTransformer()],
+      ['custom', new CustomTransformer()]
     ]);
     this.validator = new FieldValidator();
   }
@@ -26,9 +28,13 @@ export class Mapper {
     for (const [targetField, config] of Object.entries(input.mappingConfig)) {
       let sourceValues: any[];
       try {
-        sourceValues = Array.isArray(config.source)
-          ? config.source.map(s => getNestedValue(input.data, s))
-          : [getNestedValue(input.data, config.source)];
+        if (config.source === 'data') {
+          sourceValues = [input.data];
+        } else {
+          sourceValues = Array.isArray(config.source)
+            ? config.source.map(s => getNestedValue(input.data, s))
+            : [getNestedValue(input.data, config.source)];
+        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : `Unknown error resolving source path`;
         errors.push(errorMessage);
@@ -36,9 +42,12 @@ export class Mapper {
       }
 
       // Apply transformation
-      const transformer = config.transform
-        ? this.transformers.get(config.transform.split('(')[0])
+      const transformKey = config.transform
+        ? config.transform.startsWith('(') && config.transform.includes(')=>')
+          ? 'custom'
+          : config.transform.split('(')[0]
         : null;
+      const transformer = transformKey ? this.transformers.get(transformKey) : null;
       const transformResult = transformer
         ? transformer.transform(config, sourceValues, input.translator)
         : { value: sourceValues[0], errors: [] };
