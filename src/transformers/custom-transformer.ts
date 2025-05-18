@@ -1,23 +1,34 @@
 import { Transformer } from '../interfaces/transformer';
 import { MappingConfig, Translator } from '../interfaces/mapping-config';
+import { VM } from 'vm2';
 
 export class CustomTransformer implements Transformer {
   transform(config: MappingConfig, sourceValues: any[], translator?: Translator): { value: any; errors: string[] } {
     const errors: string[] = [];
-    let transformFn: (data: any) => any;
+
+    // Initialize VM2 sandbox
+    const vm = new VM({
+      timeout: 1000, // Limit execution time to 1 second
+      sandbox: {}, // Empty sandbox to prevent access to global objects
+      eval: false, // Disable eval
+      wasm: false, // Disable WebAssembly
+    });
 
     try {
-      // Parse the function string, e.g., "(data)=>data.user.first_name+data.user.last_name"
-      transformFn = new Function('data', `return (${config.transform})(data);`) as (data: any) => any;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Invalid transform function';
-      errors.push(`Invalid transform function: ${errorMessage}`);
-      return { value: null, errors };
-    }
+      // Prepare the transform function string
+      // Return a function directly instead of using module.exports
+      const script = `
+        (function(data) {
+          const fn = ${config.transform};
+          return fn(data);
+        })
+      `;
 
-    try {
-      // Use the first source value (full data object for source: 'data', or resolved value)
-      const value = transformFn(sourceValues[0]);
+      // Run the script in the VM to get the wrapper function
+      const wrapperFn = vm.run(script);
+
+      // Execute the wrapper function with the first source value as 'data'
+      const value = wrapperFn(sourceValues[0]);
       return { value, errors };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Transform function execution failed';

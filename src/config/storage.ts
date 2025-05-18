@@ -27,7 +27,13 @@ const mappings: Mapping[] = [
       },
       'profile.customId': {
         source: 'data',
-        transform: `()=>{return data.user.first_name.toUpperCase()+" "+data.age}`,
+        transform: `(data)=>{return data.user.first_name.toUpperCase()+" "+data.age}`,
+        type: 'string',
+        constraints: { min: 18, max: 100 }
+      },
+      'profile.customName': {
+        source: 'data',
+        transform: `(data)=>data.user.first_name.toUpperCase()+" "+data.user.last_name.toUpperCase()`,
         type: 'string',
         constraints: { min: 18, max: 100 }
       },
