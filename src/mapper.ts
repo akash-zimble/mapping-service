@@ -5,6 +5,7 @@ import { Validator } from './interfaces/validator';
 import { ConcatTransformer } from './transformers/concat-transformer';
 import { TranslateTransformer } from './transformers/translate-transformer';
 import { FieldValidator } from './validators/field-validator';
+import { getNestedValue, setNestedValue } from './utils/nested-path';
 
 export class Mapper {
   private transformers: Map<string, Transformer>;
@@ -23,10 +24,16 @@ export class Mapper {
     const errors: string[] = [];
 
     for (const [targetField, config] of Object.entries(input.mappingConfig)) {
-      // Extract source values
-      const sourceValues = Array.isArray(config.source)
-        ? config.source.map(s => input.data[s])
-        : [input.data[config.source]];
+      let sourceValues: any[];
+      try {
+        sourceValues = Array.isArray(config.source)
+          ? config.source.map(s => getNestedValue(input.data, s))
+          : [getNestedValue(input.data, config.source)];
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : `Unknown error resolving source path`;
+        errors.push(errorMessage);
+        continue;
+      }
 
       // Apply transformation
       const transformer = config.transform
@@ -59,7 +66,13 @@ export class Mapper {
       errors.push(...transformResult.errors, ...validationErrors);
 
       if (value !== null && validationErrors.length === 0) {
-        output[targetField] = value;
+        // Set value in output, supporting nested destination paths
+        try {
+          setNestedValue(output, targetField, value);
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : `Unknown error setting destination path '${targetField}'`;
+          errors.push(`Failed to set destination path '${targetField}': ${errorMessage}`);
+        }
       }
     }
 

@@ -1,23 +1,35 @@
 {
     "data": {
-      "first_name": "Jane",
-      "last_name": "Smith",
+      "user": {
+        "first_name": "Jane",
+        "last_name": "Smith",
+        "address": {
+          "city": "New York",
+          "zip": "10001",
+          "country": "USA"
+        }
+      },
       "age": "25",
       "membership": "gold",
-      "product_code": "ABC",
-      "product_suffix": "123",
-      "extra": "xyz",
+      "product": {
+        "details": {
+          "code": "ABC",
+          "suffix": "123",
+          "extra": "xyz"
+        }
+      },
       "is_active": "true",
-      "null_field": "null"
+      "null_field": "null",
+      "undefined_field": "undefined"
     },
     "mappingConfig": {
-      "full_name": {
-        "source": ["first_name", "last_name"],
+      "profile.name.full": {
+        "source": ["user.first_name", "user.last_name"],
         "transform": "concat(source[0], ' ', source[1])",
         "type": "string",
         "constraints": { "maxLength": 50 }
       },
-      "age": {
+      "profile.age": {
         "source": "age",
         "type": "number",
         "constraints": { "min": 18, "max": 100 }
@@ -28,13 +40,13 @@
         "type": "string"
       },
       "product_id": {
-        "source": ["product_code", "product_suffix", "extra"],
+        "source": ["product.details.code", "product.details.suffix", "product.details.extra"],
         "transform": "concat(source[0], '-', source[1], '[', source[2], ']')",
         "type": "string",
         "constraints": { "maxLength": 15 }
       },
       "product_name": {
-        "source": ["product_code", "product_suffix", "extra", "membership"],
+        "source": ["product.details.code", "product.details.suffix", "product.details.extra", "membership"],
         "transform": "concat(source[0], '-', source[1], '[', source[2], ']', source[3])",
         "type": "string",
         "constraints": { "maxLength": 20 }
@@ -46,6 +58,20 @@
       "null_field": {
         "source": "null_field",
         "type": "null"
+      },
+      "undefined_field": {
+        "source": "undefined_field",
+        "type": "undefined"
+      },
+      "profile.address.city": {
+        "source": "user.address.city",
+        "type": "string",
+        "constraints": { "maxLength": 100 }
+      },
+      "profile.address.country": {
+        "source": "user.address.country",
+        "type": "string",
+        "constraints": { "maxLength": 100 }
       }
     },
     "translator": {
